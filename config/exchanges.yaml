@@ -1,0 +1,208 @@
+# Global Futures Exchange Registry
+
+exchanges:
+  # === North America ===
+  CME:
+    name_en: "CME Group"
+    name_cn: "芝加哥商业交易所集团"
+    region: "North America"
+    sub_exchanges: ["CME", "CBOT", "NYMEX", "COMEX"]
+    base_url: "https://www.cmegroup.com"
+    rate_limit: 2.0
+    collector: "cme_group"
+    source_type: "api"
+
+  ICE_US:
+    name_en: "ICE Futures US"
+    name_cn: "洲际交易所(美国)"
+    region: "North America"
+    base_url: "https://www.theice.com"
+    rate_limit: 2.0
+    collector: "ice"
+    source_type: "html"
+
+  CBOE:
+    name_en: "CBOE Futures Exchange"
+    name_cn: "芝加哥期权交易所期货"
+    region: "North America"
+    base_url: "https://www.cboe.com"
+    rate_limit: 2.0
+    collector: "cboe"
+    source_type: "html"
+
+  # === Europe ===
+  ICE_EU:
+    name_en: "ICE Futures Europe"
+    name_cn: "洲际交易所(欧洲)"
+    region: "Europe"
+    base_url: "https://www.theice.com"
+    rate_limit: 2.0
+    collector: "ice"
+    source_type: "html"
+
+  EUREX:
+    name_en: "Eurex Exchange"
+    name_cn: "欧洲期货交易所"
+    region: "Europe"
+    base_url: "https://www.eurex.com"
+    rate_limit: 2.0
+    collector: "eurex"
+    source_type: "html"
+
+  LME:
+    name_en: "London Metal Exchange"
+    name_cn: "伦敦金属交易所"
+    region: "Europe"
+    base_url: "https://www.lme.com"
+    rate_limit: 2.0
+    collector: "lme"
+    source_type: "html"
+
+  # === Asia-Pacific ===
+  SGX:
+    name_en: "Singapore Exchange"
+    name_cn: "新加坡交易所"
+    region: "Asia-Pacific"
+    base_url: "https://www.sgx.com"
+    rate_limit: 2.0
+    collector: "sgx"
+    source_type: "html"
+
+  HKEX:
+    name_en: "Hong Kong Exchanges and Clearing"
+    name_cn: "香港交易所"
+    region: "Asia-Pacific"
+    base_url: "https://www.hkex.com.hk"
+    rate_limit: 2.0
+    collector: "hkex"
+    source_type: "html"
+
+  JPX:
+    name_en: "Japan Exchange Group"
+    name_cn: "日本交易所集团"
+    region: "Asia-Pacific"
+    sub_exchanges: ["OSE", "TOCOM"]
+    base_url: "https://www.jpx.co.jp"
+    rate_limit: 2.0
+    collector: "jpx"
+    source_type: "html"
+
+  KRX:
+    name_en: "Korea Exchange"
+    name_cn: "韩国交易所"
+    region: "Asia-Pacific"
+    base_url: "https://global.krx.co.kr"
+    rate_limit: 3.0
+    collector: "krx"
+    source_type: "html"
+
+  TAIFEX:
+    name_en: "Taiwan Futures Exchange"
+    name_cn: "台湾期货交易所"
+    region: "Asia-Pacific"
+    base_url: "https://www.taifex.com.tw"
+    rate_limit: 2.0
+    collector: "taifex"
+    source_type: "html"
+
+  BMD:
+    name_en: "Bursa Malaysia Derivatives"
+    name_cn: "马来西亚衍生品交易所"
+    region: "Asia-Pacific"
+    base_url: "https://www.bursamalaysia.com"
+    rate_limit: 2.0
+    collector: "bmd"
+    source_type: "html"
+
+  NSE:
+    name_en: "National Stock Exchange of India"
+    name_cn: "印度国家证券交易所"
+    region: "Asia-Pacific"
+    base_url: "https://www.nseindia.com"
+    rate_limit: 3.0
+    collector: "nse"
+    source_type: "api"
+
+  ASX:
+    name_en: "ASX (Australian Securities Exchange)"
+    name_cn: "澳大利亚证券交易所"
+    region: "Asia-Pacific"
+    base_url: "https://www.asx.com.au"
+    rate_limit: 2.0
+    collector: "asx"
+    source_type: "html"
+
+  # === China ===
+  SHFE:
+    name_en: "Shanghai Futures Exchange"
+    name_cn: "上海期货交易所"
+    region: "China"
+    base_url: "https://www.shfe.com.cn"
+    rate_limit: 3.0
+    collector: "shfe"
+    source_type: "html"
+
+  DCE:
+    name_en: "Dalian Commodity Exchange"
+    name_cn: "大连商品交易所"
+    region: "China"
+    base_url: "https://www.dce.com.cn"
+    rate_limit: 3.0
+    collector: "dce"
+    source_type: "html"
+
+  CZCE:
+    name_en: "Zhengzhou Commodity Exchange"
+    name_cn: "郑州商品交易所"
+    region: "China"
+    base_url: "https://www.czce.com.cn"
+    rate_limit: 3.0
+    collector: "czce"
+    source_type: "html"
+
+  CFFEX:
+    name_en: "China Financial Futures Exchange"
+    name_cn: "中国金融期货交易所"
+    region: "China"
+    base_url: "https://www.cffex.com.cn"
+    rate_limit: 3.0
+    collector: "cffex"
+    source_type: "html"
+
+  INE:
+    name_en: "Shanghai International Energy Exchange"
+    name_cn: "上海国际能源交易中心"
+    region: "China"
+    base_url: "https://www.ine.cn"
+    rate_limit: 3.0
+    collector: "ine"
+    source_type: "html"
+
+  GFEX:
+    name_en: "Guangzhou Futures Exchange"
+    name_cn: "广州期货交易所"
+    region: "China"
+    base_url: "https://www.gfex.com.cn"
+    rate_limit: 3.0
+    collector: "gfex"
+    source_type: "html"
+
+  # === Americas ===
+  B3:
+    name_en: "B3 - Brasil Bolsa Balcão"
+    name_cn: "巴西证券期货交易所"
+    region: "Americas"
+    base_url: "https://www.b3.com.br"
+    rate_limit: 2.0
+    collector: "b3"
+    source_type: "html"
+
+  # === Russia ===
+  MOEX:
+    name_en: "Moscow Exchange"
+    name_cn: "莫斯科交易所"
+    region: "Europe"
+    base_url: "https://www.moex.com"
+    rate_limit: 2.0
+    collector: "moex"
+    source_type: "api"

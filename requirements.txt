@@ -1,0 +1,10 @@
+httpx[http2]>=0.27
+beautifulsoup4>=4.12
+lxml>=5.1
+openpyxl>=3.1
+pydantic>=2.5
+pyyaml>=6.0
+tenacity>=8.2
+pdfplumber>=0.10
+tqdm>=4.66
+aiosqlite>=0.19
