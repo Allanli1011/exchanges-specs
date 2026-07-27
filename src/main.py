@@ -89,13 +89,62 @@ def load_exchange_config() -> dict:
         return yaml.safe_load(f)["exchanges"]
 
 
+def validate_registry(config: dict):
+    config_keys = set(config.keys())
+    collector_keys = set(COLLECTOR_MAP.keys())
+    missing_in_config = sorted(collector_keys - config_keys)
+    missing_in_collectors = sorted(config_keys - collector_keys)
+
+    if missing_in_config or missing_in_collectors:
+        raise RuntimeError(
+            "Exchange registry mismatch: "
+            f"missing_in_config={missing_in_config}, missing_in_collectors={missing_in_collectors}"
+        )
+
+
 async def collect_exchange(
     exchange_key: str,
     collector_cls: Type[BaseCollector],
     http_client: HttpClient,
-) -> List[ContractSpec]:
-    collector = collector_cls(http_client)
-    return await collector.safe_collect()
+    exchange_config: dict | None = None,
+) -> tuple[str, List[ContractSpec]]:
+    collector = collector_cls(http_client, exchange_key=exchange_key)
+    collector.apply_config(exchange_config)
+    return exchange_key, await collector.safe_collect()
+
+
+def deduplicate_contracts(contracts: List[ContractSpec]) -> tuple[List[ContractSpec], List[tuple[str, str | None, str, str]]]:
+    """Remove duplicate contracts while preserving the first collected record."""
+    unique_contracts: List[ContractSpec] = []
+    duplicates: List[tuple[str, str | None, str, str]] = []
+    seen: set[tuple[str, str | None, str, str]] = set()
+
+    for spec in contracts:
+        key = (spec.exchange_code, spec.exchange_sub, spec.ticker, spec.product_name_en)
+        if key in seen:
+            duplicates.append(key)
+            continue
+        seen.add(key)
+        unique_contracts.append(spec)
+
+    return unique_contracts, duplicates
+
+
+def build_output_filename(exchange_keys: List[str], generated_at: datetime | None = None) -> str:
+    """Build a collision-resistant filename that reflects collection scope."""
+    generated_at = generated_at or datetime.now()
+    timestamp = generated_at.strftime("%Y-%m-%d_%H-%M-%S")
+
+    if len(exchange_keys) == len(COLLECTOR_MAP):
+        scope = "ALL"
+    elif len(exchange_keys) == 1:
+        scope = exchange_keys[0]
+    elif len(exchange_keys) <= 4:
+        scope = "-".join(exchange_keys)
+    else:
+        scope = f"{len(exchange_keys)}_EXCHANGES"
+
+    return f"Global_Futures_Specs_{scope}_{timestamp}.xlsx"
 
 
 async def run(args):
@@ -103,10 +152,11 @@ async def run(args):
     logger = logging.getLogger("main")
 
     config = load_exchange_config()
+    validate_registry(config)
 
     # Determine which exchanges to collect
     if "all" in args.exchanges:
-        exchange_keys = list(COLLECTOR_MAP.keys())
+        exchange_keys = list(config.keys())
     else:
         exchange_keys = [e.upper() for e in args.exchanges]
         invalid = [e for e in exchange_keys if e not in COLLECTOR_MAP]
@@ -128,20 +178,34 @@ async def run(args):
     tasks = []
     for key in exchange_keys:
         collector_cls = COLLECTOR_MAP[key]
-        tasks.append(collect_exchange(key, collector_cls, http_client))
+        tasks.append(collect_exchange(key, collector_cls, http_client, config.get(key)))
 
     pbar = tqdm(total=len(tasks), desc="Exchanges", unit="exch")
     for coro in asyncio.as_completed(tasks):
-        contracts = await coro
+        exchange_key, contracts = await coro
+        unexpected_codes = sorted({spec.exchange_code for spec in contracts if spec.exchange_code != exchange_key})
+        if unexpected_codes:
+            raise RuntimeError(
+                f"{exchange_key} collector returned unexpected exchange codes: {unexpected_codes}"
+            )
         all_contracts.extend(contracts)
         pbar.update(1)
     pbar.close()
 
-    logger.info(f"Total contracts collected: {len(all_contracts)}")
+    all_contracts, duplicates = deduplicate_contracts(all_contracts)
+    if duplicates:
+        logger.warning(f"Removed {len(duplicates)} duplicate contracts after collection")
+
+    logger.info(f"Total unique contracts collected: {len(all_contracts)}")
 
     # Export to Excel
     output_dir = os.path.join(PROJECT_ROOT, "data", "output")
-    filepath = export_to_excel(all_contracts, output_dir=output_dir)
+    filepath = export_to_excel(
+        all_contracts,
+        output_dir=output_dir,
+        filename=build_output_filename(exchange_keys),
+        region_map={key: meta.get("region", "Other") for key, meta in config.items()},
+    )
     logger.info(f"Excel output saved to: {filepath}")
 
     # Cleanup

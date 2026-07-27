@@ -94,6 +94,13 @@ DELIVERY_COLUMNS = [
     ("final_settlement_price", "Final Settlement", 35),
 ]
 
+METADATA_COLUMNS = [
+    ("data_quality", "Data Quality", 14),
+    ("source_type", "Source Type", 14),
+    ("source_url", "Source URL", 50),
+    ("notes", "Notes", 40),
+]
+
 ALL_COLUMNS = BASIC_COLUMNS + [
     c for c in TAS_COLUMNS if c[0] not in {b[0] for b in BASIC_COLUMNS}
 ] + [
@@ -101,6 +108,11 @@ ALL_COLUMNS = BASIC_COLUMNS + [
 ] + [
     c for c in DELIVERY_COLUMNS if c[0] not in {b[0] for b in BASIC_COLUMNS}
     and c[0] not in {t[0] for t in TAS_COLUMNS} and c[0] not in {r[0] for r in RISK_COLUMNS}
+ ] + [
+    c for c in METADATA_COLUMNS if c[0] not in {b[0] for b in BASIC_COLUMNS}
+    and c[0] not in {t[0] for t in TAS_COLUMNS}
+    and c[0] not in {r[0] for r in RISK_COLUMNS}
+    and c[0] not in {d[0] for d in DELIVERY_COLUMNS}
 ]
 
 
@@ -108,17 +120,18 @@ def export_to_excel(
     contracts: List[ContractSpec],
     output_dir: str = "data/output",
     filename: Optional[str] = None,
+    region_map: Optional[dict] = None,
 ) -> str:
     """Export contract specs to a professionally formatted Excel workbook."""
     os.makedirs(output_dir, exist_ok=True)
     if filename is None:
-        filename = f"Global_Futures_Specs_{datetime.now().strftime('%Y-%m-%d')}.xlsx"
+        filename = f"Global_Futures_Specs_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.xlsx"
     filepath = os.path.join(output_dir, filename)
 
     wb = Workbook()
 
     # Sheet 1: Summary
-    _build_summary_sheet(wb.active, contracts)
+    _build_summary_sheet(wb.active, contracts, region_map=region_map)
     wb.active.title = "Summary"
 
     # Sheet 2: All Contracts
@@ -160,7 +173,7 @@ def export_to_excel(
     return filepath
 
 
-def _build_summary_sheet(ws: Worksheet, contracts: List[ContractSpec]):
+def _build_summary_sheet(ws: Worksheet, contracts: List[ContractSpec], region_map: Optional[dict] = None):
     """Build the summary dashboard sheet."""
     ws.sheet_properties.tabColor = "1F4E79"
 
@@ -185,7 +198,7 @@ def _build_summary_sheet(ws: Worksheet, contracts: List[ContractSpec]):
         cell.alignment = Alignment(horizontal="center")
 
     exchanges = sorted(set(c.exchange_code for c in contracts))
-    region_map = _get_region_map()
+    region_map = region_map or _get_region_map()
 
     for row_idx, exch in enumerate(exchanges, 5):
         exch_contracts = [c for c in contracts if c.exchange_code == exch]
@@ -240,6 +253,9 @@ def _build_data_sheet(ws: Worksheet, contracts: List[ContractSpec], columns: lis
             cell.border = THIN_BORDER
             if row_idx % 2 == 0:
                 cell.fill = ALT_ROW_FILL
+            if field == "source_url" and val and str(val).startswith("http"):
+                cell.font = HYPERLINK_FONT
+                cell.hyperlink = str(val)
 
     # AutoFilter
     if contracts:
@@ -252,7 +268,7 @@ def _build_data_sheet(ws: Worksheet, contracts: List[ContractSpec], columns: lis
 
 def _build_quality_sheet(ws: Worksheet, contracts: List[ContractSpec]):
     """Build the data quality audit sheet."""
-    headers = ["Exchange", "Product", "Ticker", "Completeness %", "Quality", "Source Type", "Source URL", "Updated"]
+    headers = ["Exchange", "Product", "Ticker", "Completeness %", "Quality", "Source Type", "Source URL", "Updated", "Notes"]
     for col, header in enumerate(headers, 1):
         cell = ws.cell(row=1, column=col, value=header)
         cell.font = HEADER_FONT
@@ -269,6 +285,7 @@ def _build_quality_sheet(ws: Worksheet, contracts: List[ContractSpec]):
             spec.source_type or "N/A",
             spec.source_url or "N/A",
             spec.last_updated or "N/A",
+            spec.notes or "",
         ]
         for col, val in enumerate(values, 1):
             cell = ws.cell(row=row_idx, column=col, value=val)
@@ -281,7 +298,7 @@ def _build_quality_sheet(ws: Worksheet, contracts: List[ContractSpec]):
                 cell.font = HYPERLINK_FONT
                 cell.hyperlink = val
 
-    widths = [12, 30, 10, 16, 14, 12, 50, 20]
+    widths = [12, 30, 10, 16, 14, 12, 50, 20, 40]
     for i, w in enumerate(widths, 1):
         ws.column_dimensions[get_column_letter(i)].width = w
     ws.freeze_panes = "A2"

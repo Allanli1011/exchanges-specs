@@ -9,3 +9,6 @@ dist/
 build/
 .idea/
 .vscode/
+.pytest_cache/
+.claude/settings.local.json
+.claude/worktrees/

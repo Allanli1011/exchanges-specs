@@ -2,11 +2,12 @@
 
 from datetime import datetime, timezone
 from decimal import Decimal
-from typing import List
+from typing import List, Optional
 import logging
 
 from src.collectors.base import BaseCollector
 from src.models.contract_spec import ContractSpec, DeliveryMethod
+from src.utils.http_client import HttpClient
 
 logger = logging.getLogger(__name__)
 
@@ -41,11 +42,21 @@ class ICECollector(BaseCollector):
     exchange_name_cn = "洲际交易所"
     rate_limit = 2.0
 
+    def __init__(self, http_client: HttpClient, exchange_key: Optional[str] = None):
+        super().__init__(http_client, exchange_key=exchange_key)
+
+    def _selected_products(self) -> List[dict]:
+        if self.requested_exchange == "ICE_US":
+            return ICE_US_PRODUCTS
+        if self.requested_exchange == "ICE_EU":
+            return ICE_EU_PRODUCTS
+        return ICE_US_PRODUCTS + ICE_EU_PRODUCTS
+
     async def collect_all(self) -> List[ContractSpec]:
         results = []
         now_str = datetime.now(timezone.utc).isoformat()
 
-        for prod in ICE_US_PRODUCTS + ICE_EU_PRODUCTS:
+        for prod in self._selected_products():
             dm = DeliveryMethod.CASH if prod["delivery"] == "cash" else DeliveryMethod.PHYSICAL
             exch = prod["exchange"]
             ccy = "GBP" if "GBP" in prod["quote"] else "EUR" if "EUR" in prod["quote"] else "USD"
@@ -68,12 +79,12 @@ class ICECollector(BaseCollector):
                 tick_value=Decimal(str(prod["tick_val"])),
                 tick_value_currency=ccy,
                 contract_months=prod["months"],
-                trading_hours_electronic="20:00-18:00 ET (ICE US) / 01:00-19:00 London (ICE EU)",
+                trading_hours_electronic="20:00-18:00 ET" if exch == "ICE_US" else "01:00-19:00 London",
+                trading_hours_notes="Trading hours vary by product and holiday schedule.",
                 delivery_method=dm,
-                source_url=f"https://www.theice.com/products/",
+                source_url="https://www.theice.com/products/" if exch == "ICE_US" else "https://www.ice.com/products/Futures-Options/",
                 source_type="static",
                 last_updated=now_str,
-                data_quality="complete",
             )
             results.append(spec)
         return results

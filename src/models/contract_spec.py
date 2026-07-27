@@ -88,10 +88,26 @@ class ContractSpec(BaseModel):
 
     def completeness_score(self) -> float:
         """Calculate data completeness as percentage of non-None fields."""
-        fields = self.model_fields
+        fields = type(self).model_fields
         total = len(fields) - 5  # exclude metadata fields
         filled = sum(
             1 for k, v in self.model_dump().items()
             if v is not None and k not in ("source_url", "source_type", "last_updated", "data_quality", "notes")
         )
         return round(filled / total * 100, 1) if total > 0 else 0.0
+
+    def inferred_data_quality(self) -> str:
+        """Infer a realistic data quality label from coverage and source type."""
+        score = self.completeness_score()
+        source_parts = {
+            part.strip().lower()
+            for part in (self.source_type or "").split("+")
+            if part.strip()
+        }
+        has_live_source = bool(source_parts & {"api", "html", "pdf"})
+
+        if score >= 75 and has_live_source and "static" not in source_parts:
+            return "complete"
+        if score >= 40 or has_live_source:
+            return "partial"
+        return "manual_review"
