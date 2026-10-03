@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Allanli1011/exchanges-specs/schemas/calendar_event.schema.json",
+  "title": "Exchange Calendar Event",
+  "type": "object",
+  "required": [
+    "exchange",
+    "product_scope",
+    "event_date",
+    "event_type",
+    "timezone",
+    "source_url",
+    "last_verified"
+  ],
+  "properties": {
+    "exchange": {"type": "string", "minLength": 1},
+    "venue": {"type": ["string", "null"]},
+    "product_scope": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "event_date": {"type": "string", "format": "date"},
+    "trading_date": {"type": ["string", "null"], "format": "date"},
+    "event_type": {
+      "enum": ["full_close", "early_close", "late_open", "modified_hours"]
+    },
+    "timezone": {"type": "string", "minLength": 1},
+    "open_time": {
+      "anyOf": [
+        {"type": "string", "pattern": "^([01]\\d|2[0-3]):[0-5]\\d(:[0-5]\\d)?$"},
+        {"type": "null"}
+      ]
+    },
+    "close_time": {
+      "anyOf": [
+        {"type": "string", "pattern": "^([01]\\d|2[0-3]):[0-5]\\d(:[0-5]\\d)?$"},
+        {"type": "null"}
+      ]
+    },
+    "source_url": {"type": "string", "format": "uri"},
+    "last_verified": {"type": "string", "format": "date"},
+    "notes": {"type": ["string", "null"]}
+  },
+  "additionalProperties": false
+}
