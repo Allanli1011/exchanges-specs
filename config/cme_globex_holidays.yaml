@@ -1,0 +1,37 @@
+source_url: https://www.cmegroup.com/trading-hours.html
+verified_on: 2026-10-04
+years:
+  "2026":
+    - name: New Year's
+      start_date: 2025-12-31
+      end_date: 2026-01-02
+    - name: Dr. Martin Luther King, Jr.
+      start_date: 2026-01-18
+      end_date: 2026-01-20
+    - name: Presidents Day
+      start_date: 2026-02-15
+      end_date: 2026-02-17
+    - name: Good Friday
+      start_date: 2026-04-02
+      end_date: 2026-04-04
+    - name: Memorial Day
+      start_date: 2026-05-24
+      end_date: 2026-05-26
+    - name: Juneteenth
+      start_date: 2026-06-18
+      end_date: 2026-06-19
+    - name: Independence Day
+      start_date: 2026-07-03
+      end_date: 2026-07-05
+    - name: Labor Day
+      start_date: 2026-09-06
+      end_date: 2026-09-08
+    - name: Thanksgiving
+      start_date: 2026-11-26
+      end_date: 2026-11-28
+    - name: Christmas
+      start_date: 2026-12-24
+      end_date: 2026-12-26
+    - name: New Year's
+      start_date: 2026-12-31
+      end_date: 2027-01-01
