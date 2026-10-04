@@ -8,6 +8,7 @@ from pathlib import Path
 
 from src.calendar_sources.cme_baseline import load_cme_holiday_baseline
 from src.calendar_sources.cme_reference_data import CMEReferenceDataClient
+from src.calendar_sources.cme_schedule_normalizer import normalize_trading_schedules
 from src.exporters.notion_calendar import NotionCalendarClient
 
 
@@ -37,6 +38,7 @@ def build_cme_refresh_payload(
                 api_id=api_id,
                 api_password=api_password,
             ).fetch_trading_schedules()
+            normalized_events = normalize_trading_schedules(schedules)
             payload["cme_reference_data"] = {
                 "status": "success",
                 "endpoint": (
@@ -44,7 +46,11 @@ def build_cme_refresh_payload(
                     "refdata/v3/tradingSchedules"
                 ),
                 "record_count": len(schedules),
+                "normalized_event_count": len(normalized_events),
                 "records": schedules,
+                "normalized_events": [
+                    event.as_dict() for event in normalized_events
+                ],
             }
         except Exception as exc:
             payload["cme_reference_data"] = {
@@ -86,7 +92,7 @@ def run_refresh(
         payload["cme_reference_data"] = {
             key: value
             for key, value in reference.items()
-            if key != "records"
+            if key not in {"records", "normalized_events"}
         }
         payload["cme_reference_data"]["artifact"] = str(reference_output_path)
 
