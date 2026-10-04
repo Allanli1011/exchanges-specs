@@ -43,6 +43,8 @@ jobs:
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_CALENDAR_DATA_SOURCE_ID: "d9e7b145-64c9-462d-b56a-61dbc7502277"
+          CME_API_ID: ${{ secrets.CME_API_ID }}
+          CME_API_PASSWORD: ${{ secrets.CME_API_PASSWORD }}
         run: |
           python -m src.calendar_refresh \
             --output artifacts/exchange_calendar_refresh.json
@@ -53,3 +55,4 @@ jobs:
           path: |
             artifacts/exchange_calendar_refresh.json
             artifacts/calendar_source_watch.json
+            artifacts/cme_trading_schedules.json
