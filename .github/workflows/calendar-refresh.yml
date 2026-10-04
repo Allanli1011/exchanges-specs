@@ -1,0 +1,27 @@
+name: Exchange calendar refresh
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 0"
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -r requirements.txt
+      - name: Refresh official exchange holiday coverage
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_CALENDAR_DATA_SOURCE_ID: "d9e7b145-64c9-462d-b56a-61dbc7502277"
+        run: |
+          python -m src.calendar_refresh \
+            --output artifacts/exchange_calendar_refresh.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: exchange-calendar-refresh
+          path: artifacts/exchange_calendar_refresh.json
