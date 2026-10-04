@@ -1,0 +1,16 @@
+sources:
+  - id: ice-holiday-hours
+    exchange: ICE
+    kind: html_text
+    url: https://www.ice.com/holiday-hours
+    purpose: Market-specific holiday schedules and special hours
+  - id: ice-futures-europe-trading-schedule
+    exchange: ICE Futures Europe
+    kind: binary
+    url: https://www.ice.com/publicdocs/Trading_Schedule.pdf
+    purpose: Product-level ICE Futures Europe trading schedule
+  - id: sgx-dt-2026-holiday-circular
+    exchange: SGX
+    kind: binary
+    url: https://api2.sgx.com/sites/default/files/2025-12/DTAM%20109%20of%202025%20-%20SGX-DT%20Derivatives%20Trading%20Holiday%20Schedule%20for%20Year%202026.pdf
+    purpose: Official SGX-DT 2026 derivatives holiday circular
