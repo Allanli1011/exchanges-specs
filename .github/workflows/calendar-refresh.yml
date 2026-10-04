@@ -2,6 +2,16 @@ name: Exchange calendar refresh
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/calendar_refresh.py"
+      - "src/calendar_source_watch.py"
+      - "src/calendar_sources/**"
+      - "src/exporters/notion_calendar.py"
+      - "config/calendar_sources.yaml"
+      - ".github/workflows/calendar-refresh.yml"
   schedule:
     - cron: "0 0 * * 0"
 
